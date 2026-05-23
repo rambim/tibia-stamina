@@ -421,6 +421,14 @@
         return (BNS-s)*3+(MAX-BNS)*6;
     }
 
+    function staminaAfter(s, avMins){
+        if(s>=MAX) return MAX;
+        if(s>=BNS) return Math.min(MAX, s + avMins/6);
+        const timeToBns=(BNS-s)*3;
+        if(avMins>=timeToBns) return Math.min(MAX, BNS+(avMins-timeToBns)/6);
+        return s + avMins/3;
+    }
+
     function fmt(m){ return `${Math.floor(m/60)}:${String(Math.floor(m%60)).padStart(2,'0')}`; }
 
     function parse(str){
@@ -496,8 +504,9 @@
         document.getElementById('fullAtTime').textContent=fc(new Date(now.getTime()+(play+rt)*60000));
 
         if(rec(s)>av){
+            const staminaAtTarget=staminaAfter(s,av);
             document.getElementById('warningBox').innerHTML=
-                `<div class="warning">⚠ Mesmo sem jogar, a stamina não chegará a 42:00 até ${t}. Necessário: ${fmt(rec(s))} — Disponível: ${fmt(av)}</div>`;
+                `<div class="warning">⚠ Mesmo sem jogar, a stamina não chegará a 42:00 até ${t}. Necessário: ${fmt(rec(s))} — Disponível: ${fmt(av)}<br>📊 Stamina ao chegar em ${t}: <strong>${fmt(Math.floor(staminaAtTarget))}</strong></div>`;
         }
     }
 
