@@ -3,360 +3,516 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Stamina Tibia</title>
+    <title>Tibia Stamina Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Cinzel', serif;
+            background:
+                linear-gradient(rgba(0,0,0,0.62), rgba(0,0,0,0.78)),
+                url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1920&q=80') center/cover fixed;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 20px;
+            padding: 20px 12px;
         }
 
-        .container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-            padding: 40px;
-            max-width: 580px;
-            width: 100%;
+        .container { max-width: 720px; width: 100%; }
+
+        /* PANEL */
+        .panel {
+            background: rgba(6,4,0,0.84);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200,150,30,0.3);
+            border-top: 1px solid rgba(240,190,60,0.5);
+            border-radius: 4px;
         }
 
-        h1 { font-size: 26px; font-weight: 600; color: #1a1a1a; text-align: center; margin-bottom: 4px; }
-        .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
+        /* HEADER */
+        .header { text-align:center; margin-bottom:14px; }
 
-        .time-display {
+        .header h1 {
+            font-family: 'Cinzel Decorative', serif;
+            font-size: 32px;
+            color: #f5dc5a;
+            letter-spacing: 5px;
+            text-shadow: 0 0 28px rgba(240,200,80,0.55), 0 2px 6px rgba(0,0,0,0.9);
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: #c8a060;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.9);
+        }
+
+        /* CLOCK */
+        .clock-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .clock-box {
+            background: rgba(6,4,0,0.84);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200,150,30,0.3);
+            border-top: 1px solid rgba(240,190,60,0.5);
+            border-radius: 4px;
+            padding: 14px 12px;
+            text-align: center;
+        }
+
+        .clock-label {
+            font-size: 11px;
+            color: #c8a060;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        .clock-value {
+            font-size: 38px;
+            font-weight: 700;
+            color: #f5e070;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 4px;
+            text-shadow: 0 0 14px rgba(240,200,80,0.45), 0 2px 4px rgba(0,0,0,0.9);
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            font-size: 11px;
+            color: #c8a060;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            text-align: center;
+            border-bottom: 1px solid rgba(200,150,30,0.2);
+            padding: 12px 16px 10px;
+        }
+
+        /* STAMINA BAR */
+        .bar-wrap { padding: 12px 18px; }
+
+        .bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #b09050;
+            margin-bottom: 6px;
+        }
+
+        .bar-track {
+            height: 28px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(200,150,30,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-slow { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#1a7a1a,#30c030); transition:width .4s; }
+        .bar-fast { position:absolute; top:0; bottom:0; background:linear-gradient(90deg,#c9a800,#f5d800); transition:width .4s,left .4s; }
+        .bar-div  { position:absolute; top:0; bottom:0; width:2px; background:rgba(0,0,0,0.55); left:calc(39/42*100%); }
+        .bar-text {
+            position:absolute; inset:0;
+            display:flex; align-items:center; justify-content:center;
+            font-size:14px; font-weight:700; color:#fff;
+            font-family:'Courier New',monospace; letter-spacing:2px;
+            text-shadow:0 1px 4px rgba(0,0,0,0.95);
+        }
+
+        .bar-legend { display:flex; gap:16px; margin-top:6px; justify-content:flex-end; }
+        .bar-legend-item { display:flex; align-items:center; gap:5px; font-size:11px; color:#b09050; }
+        .bar-legend-dot { width:10px; height:10px; border-radius:1px; }
+
+        /* INPUTS */
+        .input-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
-            margin-bottom: 24px;
+            padding: 0 18px 16px;
         }
 
-        .time-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 16px;
-            border-radius: 12px;
-            color: white;
-            text-align: center;
+        .field-label {
+            font-size: 11px;
+            color: #c8a060;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+            display: block;
         }
 
-        .time-label { font-size: 11px; opacity: 0.85; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-        .time-value { font-size: 26px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 2px; }
-
-        .input-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-
-        .form-field { display: flex; flex-direction: column; }
-
-        label { font-size: 11px; font-weight: 700; color: #666; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        input[type="text"], input[type="time"] {
-            padding: 14px 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 18px;
+        .tibia-input {
+            background: rgba(0,0,0,0.65);
+            border: 1px solid rgba(200,150,30,0.4);
+            border-bottom: 1px solid rgba(240,190,60,0.6);
+            border-radius: 3px;
+            padding: 12px;
+            font-size: 26px;
             font-weight: 700;
             font-family: 'Courier New', monospace;
+            color: #f5e070;
             text-align: center;
-            background: #fafafa;
-            transition: border-color 0.2s;
+            width: 100%;
+            transition: border-color .2s, box-shadow .2s;
         }
 
-        input[type="text"]:focus, input[type="time"]:focus {
+        .tibia-input:focus {
             outline: none;
-            border-color: #667eea;
-            background: white;
+            border-color: rgba(240,200,80,.7);
+            box-shadow: 0 0 0 2px rgba(200,160,40,.15);
         }
 
-        input::placeholder { color: #bbb; font-weight: 400; }
-        .helper-text { font-size: 11px; color: #aaa; margin-top: 4px; }
+        .tibia-input::placeholder { color:rgba(180,130,30,.3); font-weight:400; }
+        .field-hint { font-size:10px; color:#806030; margin-top:5px; }
 
-        .play-time-box {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            padding: 28px;
-            border-radius: 14px;
+        /* TARGET */
+        .target-wrap {
+            padding: 0 18px 16px;
+        }
+
+        .target-inner {
+            background: rgba(18,12,1,0.75);
+            border: 1px solid rgba(240,190,60,0.45);
+            border-radius: 4px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .target-icon { font-size:28px; filter:drop-shadow(0 0 8px rgba(240,190,60,.4)); }
+        .target-content { flex:1; }
+        .target-label { font-size:11px; color:#f0d060; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:7px; }
+
+        input[type="time"].tibia-input { font-size:28px; width:160px; }
+
+        .target-hint-text { font-size:10px; color:#806030; text-align:right; line-height:1.6; }
+
+        /* WARNING */
+        .warning-wrap { padding: 0 0 10px; }
+        .warning {
+            background: rgba(35,4,0,.88);
+            border: 1px solid rgba(200,60,0,.55);
+            border-radius: 3px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #ff8844;
+            letter-spacing: .5px;
+            text-shadow: 0 1px 3px rgba(0,0,0,.8);
+        }
+
+        /* RESULT */
+        .result-panel {
+            background: rgba(3,14,1,.88);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(60,160,20,.4);
+            border-top: 2px solid rgba(90,200,30,.6);
+            border-radius: 4px;
+            padding: 22px 18px 18px;
             text-align: center;
-            color: white;
-            margin-bottom: 16px;
-            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+            margin-bottom: 10px;
         }
 
-        .play-label { font-size: 11px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; }
-        .play-time { font-size: 52px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 2px; line-height: 1; margin-bottom: 8px; }
-        .play-sub { font-size: 13px; opacity: 0.9; margin-bottom: 16px; }
-        .play-times-row { display: flex; justify-content: center; gap: 40px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 14px; }
-        .play-time-item { text-align: center; }
-        .play-time-item-label { font-size: 10px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-        .play-time-item-value { font-size: 24px; font-weight: 700; font-family: 'Courier New', monospace; letter-spacing: 1px; }
+        .result-label { font-size:11px; color:#70c030; text-transform:uppercase; letter-spacing:2.5px; margin-bottom:8px; }
 
-        .stats {
+        .result-time {
+            font-size: 72px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: #88f040;
+            letter-spacing: 5px;
+            line-height: 1;
+            text-shadow: 0 0 30px rgba(130,240,50,.5), 0 2px 6px rgba(0,0,0,.9);
+            margin-bottom: 8px;
+        }
+
+        .result-sub { font-size:12px; color:#5a9030; letter-spacing:.5px; margin-bottom:16px; }
+
+        .result-times-row {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            border-top: 1px solid rgba(60,140,20,.25);
+            padding-top: 14px;
+        }
+
+        .result-time-label { font-size:11px; color:#5a8030; text-transform:uppercase; letter-spacing:1px; margin-bottom:5px; }
+        .result-time-value { font-size:32px; font-weight:700; font-family:'Courier New',monospace; color:#b8f070; text-shadow:0 0 10px rgba(150,230,60,.35); }
+
+        /* STATS */
+        .stats-row {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 16px;
+            gap: 8px;
+            margin-bottom: 10px;
         }
 
         .stat-card {
-            background: #f8f9fa;
-            padding: 14px 12px;
-            border-radius: 10px;
-            border: 1px solid #e8e8e8;
+            background: rgba(6,4,0,.84);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200,150,30,.25);
+            border-radius: 3px;
+            padding: 14px 10px;
             text-align: center;
         }
 
-        .stat-label { font-size: 10px; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .stat-value { font-size: 22px; font-weight: 700; font-family: 'Courier New', monospace; color: #1a1a1a; }
+        .stat-label { font-size:10px; color:#b09050; text-transform:uppercase; letter-spacing:.8px; margin-bottom:7px; line-height:1.4; }
+        .stat-value { font-size:26px; font-weight:700; font-family:'Courier New',monospace; color:#f0d060; text-shadow:0 0 8px rgba(220,170,50,.3); }
 
-        .warning {
-            background: #fef3c7;
-            border-left: 4px solid #f59e0b;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #92400e;
-            margin-bottom: 16px;
+        /* INFO */
+        .info-panel {
+            background: rgba(6,4,0,.84);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(200,150,30,.25);
+            border-left: 2px solid rgba(200,150,30,.5);
+            border-radius: 3px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
         }
 
-        .info-box {
-            background: #f5f7fa;
-            padding: 14px 16px;
-            border-radius: 10px;
-            border-left: 3px solid #667eea;
-        }
-
-        .info-title { font-size: 11px; font-weight: 700; color: #444; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-
-        .info-rows { display: flex; flex-direction: column; gap: 6px; }
+        .info-title { font-size:11px; color:#c8a060; text-transform:uppercase; letter-spacing:2px; margin-bottom:10px; }
 
         .info-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display:flex; justify-content:space-between; align-items:center;
+            padding:6px 0;
+            border-bottom:1px solid rgba(200,150,30,.1);
             font-size: 13px;
-            color: #666;
+            color: #c8a060;
         }
+        .info-row:last-child { border-bottom:none; }
+        .info-row span:last-child { color:#f5e070; font-family:'Courier New',monospace; font-weight:700; font-size:14px; }
 
-        .info-row span:last-child { font-weight: 600; color: #1a1a1a; font-family: 'Courier New', monospace; }
+        /* ORNAMENT */
+        .orn { text-align:center; color:rgba(200,150,30,.3); font-size:12px; letter-spacing:8px; margin:8px 0; }
 
-        @media (max-width: 480px) {
-            .container { padding: 24px; }
-            .play-time { font-size: 40px; }
-            .input-group, .stats { grid-template-columns: 1fr; }
-            .time-display { grid-template-columns: 1fr; }
+        /* SIGNATURE */
+        .sig { text-align:center; padding:10px 0 0; font-size:11px; color:rgba(200,150,30,.4); letter-spacing:2px; }
+        .sig strong { color:rgba(240,190,60,.55); }
+
+        @media (max-width:560px) {
+            .clock-value { font-size:30px; }
+            .result-time { font-size:52px; }
+            .stats-row { grid-template-columns:1fr 1fr; }
+            .input-grid { grid-template-columns:1fr; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>⚔️ Tibia Stamina</h1>
-    <p class="subtitle">Quanto posso jogar para ter 42h às 05:00?</p>
 
-    <div class="time-display">
-        <div class="time-box">
-            <div class="time-label">Hora Atual</div>
-            <div class="time-value" id="currentTime">--:--</div>
+    <div class="header">
+        <h1>⚔ Tibia Stamina</h1>
+        <p class="subtitle" id="subtitle">Stamina full às 05:00</p>
+    </div>
+
+    <div class="clock-row">
+        <div class="clock-box">
+            <div class="clock-label">Hora Atual</div>
+            <div class="clock-value" id="currentTime">--:--</div>
         </div>
-        <div class="time-box">
-            <div class="time-label">Tempo até 05:00</div>
-            <div class="time-value" id="timeUntilTarget">--:--</div>
+        <div class="clock-box">
+            <div class="clock-label" id="timeUntilLabel">Tempo até 05:00</div>
+            <div class="clock-value" id="timeUntilTarget">--:--</div>
         </div>
     </div>
 
-    <div class="input-group">
-        <div class="form-field">
-            <label for="staminaInput">Stamina Atual</label>
-            <input type="text" id="staminaInput" placeholder="41:05" maxlength="5" />
-            <span class="helper-text">Formato: HH:MM</span>
-        </div>
-        <div class="form-field">
-            <label for="targetTime">Recuperar às</label>
-            <input type="time" id="targetTime" value="05:00" />
-            <span class="helper-text">Horário da meta</span>
-        </div>
-    </div>
+    <div class="orn">— ✦ —</div>
 
-    <div id="warningBox"></div>
-
-    <div class="play-time-box">
-        <div class="play-label">Tempo máximo que pode jogar</div>
-        <div class="play-time" id="playableTime">--:--</div>
-        <div class="play-sub" id="playableSub">—</div>
-        <div class="play-times-row">
-            <div class="play-time-item">
-                <div class="play-time-item-label">Parar de jogar às</div>
-                <div class="play-time-item-value" id="stopAtTime">--:--</div>
+    <div class="panel" style="margin-bottom:10px">
+        <div class="section-title">Stamina do Personagem</div>
+        <div class="bar-wrap">
+            <div class="bar-labels">
+                <span>0:00</span><span>39:00 — bônus</span><span>42:00</span>
             </div>
-            <div class="play-time-item">
-                <div class="play-time-item-label">Stamina completa às</div>
-                <div class="play-time-item-value" id="fullAtTime">--:--</div>
+            <div class="bar-track">
+                <div class="bar-slow" id="barSlow" style="width:0%"></div>
+                <div class="bar-fast" id="barFast" style="left:0%;width:0%"></div>
+                <div class="bar-div"></div>
+                <div class="bar-text" id="barText">--:--</div>
+            </div>
+            <div class="bar-legend">
+                <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#30c030"></div><span>1h = 3h reais</span></div>
+                <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#f5d800"></div><span>1h = 6h reais</span></div>
             </div>
         </div>
+        <div class="input-grid">
+            <div>
+                <label class="field-label" for="staminaInput">Stamina Atual</label>
+                <input type="text" class="tibia-input" id="staminaInput" placeholder="41:05" maxlength="5" />
+                <div class="field-hint">Formato: HH:MM</div>
+            </div>
+            <div>
+                <label class="field-label">Stamina Máxima</label>
+                <div class="tibia-input" style="cursor:default;opacity:.4;display:flex;align-items:center;justify-content:center;height:56px">42:00</div>
+            </div>
+        </div>
     </div>
 
-    <div class="stats">
+    <div class="panel" style="margin-bottom:10px">
+        <div class="section-title">Meta de Recuperação</div>
+        <div class="target-wrap">
+            <div class="target-inner">
+                <div class="target-icon">🎯</div>
+                <div class="target-content">
+                    <div class="target-label">Quero stamina full às</div>
+                    <input type="time" class="tibia-input" id="targetTime" value="05:00" style="font-size:28px;width:160px" />
+                </div>
+                <div class="target-hint-text">Considera<br>próximo dia<br>se já passou</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="warning-wrap" id="warningBox"></div>
+
+    <div class="result-panel">
+        <div class="result-label">Tempo máximo que pode jogar</div>
+        <div class="result-time" id="playableTime">--:--</div>
+        <div class="result-sub" id="playableSub">—</div>
+        <div class="result-times-row">
+            <div>
+                <div class="result-time-label">Parar de jogar às</div>
+                <div class="result-time-value" id="stopAtTime">--:--</div>
+            </div>
+            <div>
+                <div class="result-time-label">Stamina full às</div>
+                <div class="result-time-value" id="fullAtTime">--:--</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-row">
         <div class="stat-card">
             <div class="stat-label">Stamina ao parar</div>
             <div class="stat-value" id="endStamina">--:--</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Recuperação necessária</div>
+            <div class="stat-label">Falta recuperar</div>
             <div class="stat-value" id="recoveryNeeded">--:--</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Tempo para recuperar</div>
+            <div class="stat-label">Tempo p/ recuperar</div>
             <div class="stat-value" id="recoveryTimeStat">--:--</div>
         </div>
     </div>
 
-    <div class="info-box">
-        <div class="info-title">Taxas de recuperação (Tibia)</div>
-        <div class="info-rows">
-            <div class="info-row"><span>Stamina de 39:00 → 42:00</span><span>1h = 6h reais</span></div>
-            <div class="info-row"><span>Stamina de 0:00 → 39:00 </span><span>1h = 3h reais</span></div>
-        </div>
+    <div class="info-panel">
+        <div class="info-title">⚗ Taxas de Recuperação</div>
+        <div class="info-row"><span>Stamina 39:00 → 42:00 (bônus)</span><span>1h = 6h reais</span></div>
+        <div class="info-row"><span>Stamina 0:00 → 39:00</span><span>1h = 3h reais</span></div>
     </div>
+
+    <div class="sig">by <strong>Rambim Claro</strong> (2P)</div>
 </div>
 
 <script>
-    const MAX_STAMINA = 42 * 60;   // 2520 min
-    const BONUS_START = 39 * 60;   // 2340 min — abaixo de 39h fica na faixa barata
+    const MAX=42*60, BNS=39*60;
 
-    // Tempo real (minutos) necessário para ir de `stamina` até 42:00
-    function recoveryNeededFor(staminaMins) {
-        if (staminaMins >= MAX_STAMINA) return 0;
+    function rec(s){
+        if(s>=MAX) return 0;
+        if(s>=BNS) return (MAX-s)*6;
+        return (BNS-s)*3+(MAX-BNS)*6;
+    }
 
-        if (staminaMins >= BONUS_START) {
-            // Está dentro das últimas 3 horas (faixa cara: 39→42)
-            return (MAX_STAMINA - staminaMins) * 6;
-        } else {
-            // Parte barata (0→39) + parte cara (39→42)
-            const baratos = BONUS_START - staminaMins;
-            const caros   = MAX_STAMINA - BONUS_START; // sempre 3h = 180 min
-            return baratos * 3 + caros * 6;
+    function fmt(m){ return `${Math.floor(m/60)}:${String(Math.floor(m%60)).padStart(2,'0')}`; }
+
+    function parse(str){
+        const [a,b]=str.split(':');
+        const h=parseInt(a,10),m=parseInt(b,10);
+        if(isNaN(h)||isNaN(m)||h<0||h>42||m<0||m>=60) return null;
+        return h*60+m;
+    }
+
+    function minsUntil(t){
+        const [th,tm]=t.split(':').map(Number);
+        const now=new Date(),tgt=new Date(now);
+        tgt.setHours(th,tm,0,0);
+        if(tgt<=now) tgt.setDate(tgt.getDate()+1);
+        return Math.floor((tgt-now)/60000);
+    }
+
+    function updateBar(s){
+        const sp=Math.min(s,BNS)/MAX*100;
+        const fl=BNS/MAX*100;
+        const fw=Math.max(0,(s-BNS)/MAX*100);
+        document.getElementById('barSlow').style.width=sp+'%';
+        document.getElementById('barFast').style.left=fl+'%';
+        document.getElementById('barFast').style.width=fw+'%';
+        document.getElementById('barText').textContent=fmt(s);
+    }
+
+    function updateClock(){
+        const now=new Date();
+        document.getElementById('currentTime').textContent=
+            String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+        const t=document.getElementById('targetTime').value||'05:00';
+        document.getElementById('timeUntilTarget').textContent=fmt(minsUntil(t));
+    }
+
+    function updateLabel(){
+        const t=document.getElementById('targetTime').value||'05:00';
+        document.getElementById('timeUntilLabel').textContent=`Tempo até ${t}`;
+        document.getElementById('subtitle').textContent=`Stamina full às ${t}`;
+    }
+
+    function calculate(){
+        const raw=document.getElementById('staminaInput').value;
+        const t=document.getElementById('targetTime').value||'05:00';
+        document.getElementById('warningBox').innerHTML='';
+
+        if(!raw||raw.length<5){
+            ['playableTime','endStamina','recoveryNeeded','recoveryTimeStat','stopAtTime','fullAtTime']
+                .forEach(id=>document.getElementById(id).textContent='--:--');
+            document.getElementById('playableSub').textContent='—';
+            updateBar(0); return;
+        }
+
+        const s=parse(raw), av=minsUntil(t);
+        if(s===null) return;
+        updateBar(s);
+
+        let play=0;
+        for(let x=0;x<=Math.min(s,av);x++){
+            if(rec(s-x)<=av-x) play=x; else break;
+        }
+
+        const atStop=s-play, miss=MAX-atStop, rt=rec(atStop);
+        document.getElementById('playableTime').textContent=fmt(play);
+        document.getElementById('playableSub').textContent=`Stamina ao parar: ${fmt(atStop)} → recupera ${fmt(miss)} em ${fmt(rt)}`;
+        document.getElementById('endStamina').textContent=fmt(atStop);
+        document.getElementById('recoveryNeeded').textContent=fmt(miss);
+        document.getElementById('recoveryTimeStat').textContent=fmt(rt);
+
+        const now=new Date();
+        const fc=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+        document.getElementById('stopAtTime').textContent=fc(new Date(now.getTime()+play*60000));
+        document.getElementById('fullAtTime').textContent=fc(new Date(now.getTime()+(play+rt)*60000));
+
+        if(rec(s)>av){
+            document.getElementById('warningBox').innerHTML=
+                `<div class="warning">⚠ Mesmo sem jogar, a stamina não chegará a 42:00 até ${t}. Necessário: ${fmt(rec(s))} — Disponível: ${fmt(av)}</div>`;
         }
     }
 
-    function fmt(totalMins) {
-        const h = Math.floor(totalMins / 60);
-        const m = Math.floor(totalMins % 60);
-        return `${h}:${String(m).padStart(2, '0')}`;
-    }
-
-    function parseStamina(str) {
-        const parts = str.split(':');
-        if (parts.length !== 2) return null;
-        const h = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10);
-        if (isNaN(h) || isNaN(m) || h < 0 || h > 42 || m < 0 || m >= 60) return null;
-        return h * 60 + m;
-    }
-
-    function minutesUntilTarget(targetStr) {
-        const [th, tm] = targetStr.split(':').map(Number);
-        const now = new Date();
-        const target = new Date(now);
-        target.setHours(th, tm, 0, 0);
-        if (target <= now) target.setDate(target.getDate() + 1);
-        return Math.floor((target - now) / 60000);
-    }
-
-    function updateCurrentTime() {
-        const now = new Date();
-        const hh = String(now.getHours()).padStart(2, '0');
-        const mm = String(now.getMinutes()).padStart(2, '0');
-        document.getElementById('currentTime').textContent = `${hh}:${mm}`;
-
-        const targetStr = document.getElementById('targetTime').value || '05:00';
-        const mins = minutesUntilTarget(targetStr);
-        document.getElementById('timeUntilTarget').textContent = fmt(mins);
-    }
-
-    function calculate() {
-        const rawStamina = document.getElementById('staminaInput').value;
-        const targetStr  = document.getElementById('targetTime').value || '05:00';
-
-        document.getElementById('warningBox').innerHTML = '';
-
-        if (!rawStamina || rawStamina.length < 5) {
-            ['playableTime','endStamina','recoveryNeeded','recoveryTimeStat','stopAtTime','fullAtTime'].forEach(id => {
-                document.getElementById(id).textContent = '--:--';
-            });
-            document.getElementById('playableSub').textContent = '—';
-            return;
-        }
-
-        const staminaMins     = parseStamina(rawStamina);
-        const availableMins   = minutesUntilTarget(targetStr);
-
-        if (staminaMins === null) return;
-
-        // Encontrar máximo X (minutos jogando) tal que:
-        // recoveryNeededFor(staminaMins - X) <= (availableMins - X)
-        //
-        // Aumentamos X até a condição quebrar.
-        let playable = 0;
-        for (let x = 0; x <= Math.min(staminaMins, availableMins); x++) {
-            const staminaAfter  = staminaMins - x;
-            const timeLeft      = availableMins - x;
-            const recNeeded     = recoveryNeededFor(staminaAfter);
-            if (recNeeded <= timeLeft) {
-                playable = x;
-            } else {
-                break;
-            }
-        }
-
-        const staminaAtStop   = staminaMins - playable;
-        const missingStamina  = MAX_STAMINA - staminaAtStop;
-        const recTime         = recoveryNeededFor(staminaAtStop);
-        const timeLeft        = availableMins - playable;
-
-        document.getElementById('playableTime').textContent = fmt(playable);
-        document.getElementById('playableSub').textContent =
-            `Stamina ao parar: ${fmt(staminaAtStop)} → recupera ${fmt(missingStamina)} em ${fmt(recTime)}`;
-        document.getElementById('endStamina').textContent       = fmt(staminaAtStop);
-        document.getElementById('recoveryNeeded').textContent   = fmt(missingStamina);
-        document.getElementById('recoveryTimeStat').textContent = fmt(recTime);
-
-        // Horários reais
-        const now = new Date();
-        const stopAt = new Date(now.getTime() + playable * 60000);
-        const fullAt = new Date(now.getTime() + (playable + recTime) * 60000);
-        const fmtClock = d => String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
-        document.getElementById('stopAtTime').textContent = fmtClock(stopAt);
-        document.getElementById('fullAtTime').textContent = fmtClock(fullAt);
-
-        // Aviso se já não dá tempo
-        const recNow = recoveryNeededFor(staminaMins);
-        if (recNow > availableMins) {
-            document.getElementById('warningBox').innerHTML =
-                `<div class="warning">⚠️ Mesmo sem jogar, você não conseguirá 42:00 até ${targetStr}. Faltam ${fmt(recNow)} de recuperação, mas só há ${fmt(availableMins)} disponíveis.</div>`;
-        }
-    }
-
-    // Máscara de input
-    document.getElementById('staminaInput').addEventListener('input', function(e) {
-        let v = e.target.value.replace(/\D/g, '').slice(0, 4);
-        if (v.length > 2) v = v.slice(0, 2) + ':' + v.slice(2);
-        e.target.value = v;
-        calculate();
+    document.getElementById('staminaInput').addEventListener('input',function(e){
+        let v=e.target.value.replace(/\D/g,'').slice(0,4);
+        if(v.length>2) v=v.slice(0,2)+':'+v.slice(2);
+        e.target.value=v; calculate();
     });
 
-    document.getElementById('targetTime').addEventListener('change', () => {
-        updateCurrentTime();
-        calculate();
+    document.getElementById('targetTime').addEventListener('change',()=>{
+        updateClock(); updateLabel(); calculate();
     });
 
-    updateCurrentTime();
-    setInterval(() => { updateCurrentTime(); calculate(); }, 1000);
+    updateClock(); updateLabel();
+    setInterval(()=>{ updateClock(); calculate(); },1000);
     document.getElementById('staminaInput').focus();
 </script>
 </body>
