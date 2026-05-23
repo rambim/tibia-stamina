@@ -120,6 +120,7 @@
         .bar-slow { position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#1a7a1a,#30c030); transition:width .4s; }
         .bar-fast { position:absolute; top:0; bottom:0; background:linear-gradient(90deg,#c9a800,#f5d800); transition:width .4s,left .4s; }
         .bar-div  { position:absolute; top:0; bottom:0; width:2px; background:rgba(0,0,0,0.55); left:calc(39/42*100%); }
+        .bar-target { position:absolute; top:0; bottom:0; width:3px; background:#00c8ff; display:none; z-index:3; box-shadow:0 0 10px rgba(0,200,255,.9); transition:left .4s; }
         .bar-text {
             position:absolute; inset:0;
             display:flex; align-items:center; justify-content:center;
@@ -336,9 +337,11 @@
                 <div class="bar-slow" id="barSlow" style="width:0%"></div>
                 <div class="bar-fast" id="barFast" style="left:0%;width:0%"></div>
                 <div class="bar-div"></div>
+                <div class="bar-target" id="barTarget"></div>
                 <div class="bar-text" id="barText">--:--</div>
             </div>
             <div class="bar-legend">
+                <div class="bar-legend-item" id="targetLegendItem" style="display:none"><div class="bar-legend-dot" style="background:#00c8ff"></div><span id="targetLegendText">Stamina às --:--</span></div>
                 <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#30c030"></div><span>1h = 3h reais</span></div>
                 <div class="bar-legend-item"><div class="bar-legend-dot" style="background:#f5d800"></div><span>1h = 6h reais</span></div>
             </div>
@@ -479,6 +482,8 @@
             ['playableTime','endStamina','recoveryNeeded','recoveryTimeStat','stopAtTime','fullAtTime']
                 .forEach(id=>document.getElementById(id).textContent='--:--');
             document.getElementById('playableSub').textContent='—';
+            document.getElementById('barTarget').style.display='none';
+            document.getElementById('targetLegendItem').style.display='none';
             updateBar(0); return;
         }
 
@@ -503,10 +508,20 @@
         document.getElementById('stopAtTime').textContent=fc(new Date(now.getTime()+play*60000));
         document.getElementById('fullAtTime').textContent=fc(new Date(now.getTime()+(play+rt)*60000));
 
+        const barTarget=document.getElementById('barTarget');
+        const targetLegendItem=document.getElementById('targetLegendItem');
         if(rec(s)>av){
             const staminaAtTarget=staminaAfter(s,av);
+            const staminaAtTargetFmt=fmt(Math.floor(staminaAtTarget));
             document.getElementById('warningBox').innerHTML=
-                `<div class="warning">⚠ Mesmo sem jogar, a stamina não chegará a 42:00 até ${t}. Necessário: ${fmt(rec(s))} — Disponível: ${fmt(av)}<br>📊 Stamina ao chegar em ${t}: <strong>${fmt(Math.floor(staminaAtTarget))}</strong></div>`;
+                `<div class="warning">⚠ Mesmo sem jogar, a stamina não chegará a 42:00 até ${t}. Necessário: ${fmt(rec(s))} — Disponível: ${fmt(av)}<br>📊 Stamina ao chegar em ${t}: <strong>${staminaAtTargetFmt}</strong></div>`;
+            barTarget.style.left=(staminaAtTarget/MAX*100)+'%';
+            barTarget.style.display='block';
+            targetLegendItem.style.display='flex';
+            document.getElementById('targetLegendText').textContent=`${staminaAtTargetFmt} às ${t}`;
+        } else {
+            barTarget.style.display='none';
+            targetLegendItem.style.display='none';
         }
     }
 
